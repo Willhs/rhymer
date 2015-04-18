@@ -30,12 +30,11 @@ public class Rhymer {
 
 	private static final String DICT_PATH = "dict" + File.separator;
 
-	public Rhymer(String contentFN){
+	public Rhymer(String rawContent){
 		phoneType = readPhoneSyllables();
 		dictionary = readDictionaryWords(new String[]{"cmudict" + File.separator + "cmudict-0.7b.txt", "willdict.txt"});
 
-		String content = extractContent(contentFN);
-		List<Sentence> sentences = extractSentences(content);
+		List<Sentence> sentences = extractSentences(rawContent);
 
 		Set<Rhyme> rhymes = findRhymingSentences(sentences);
 
@@ -123,10 +122,25 @@ public class Rhymer {
 		for (String strSentence : strSentences){
 			//System.out.println(strSentence);
 			List<Word> words = extractWords(strSentence);
-
-			sentences.add(new Sentence(words.toArray(new Word[0])));
+			if (keepSentence(words))
+				sentences.add(new Sentence(words.toArray(new Word[0])));
 		}
 		return sentences;
+	}
+
+	/**
+	 * Ensures that useless sentences arent added to the collection of sentences 
+	 * @param words
+	 * @return true if the words should be saved in a sentence
+	 */
+	private boolean keepSentence(List<Word> words) {
+		int syllables = 0;
+		for (Word w : words){
+			syllables += w.getNumSyllables();
+		}
+		if (syllables < 1)
+			return false;
+		return true;
 	}
 
 	// TODO: make more accurate, allow acronyms and abbreviations etc.
@@ -237,7 +251,7 @@ public class Rhymer {
 		word = word.trim();
 
 		String[] dirtyChars = new String[]{ "\"", ".", ",", ";", ":", "-",
-				"[", "]", "(", ")", "{", "}"};
+				"[", "]", "(", ")", "{", "}", "!", };
 
 		for (String dirtyChar : dirtyChars){
 			word = word.replace(dirtyChar, ""); // using charsequence args (so not regex)
@@ -247,35 +261,6 @@ public class Rhymer {
 		//System.out.println("clean word:\t\t" + word);
 		return word;
 	}
-
-
-	private String extractContent(String contentFN) {
-		BufferedReader reader = null;
-
-		try {
-			reader = new BufferedReader(new FileReader(contentFN));
-		} catch (FileNotFoundException e){
-			e.printStackTrace();
-		}
-
-		String contentString = "";
-		String line;
-		try {
-			while ((line = reader.readLine()) != null){
-				contentString += line;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return contentString;
-	}
-
 
 	/**
 	 * @param sound
