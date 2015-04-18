@@ -12,12 +12,12 @@ public class Phone {
 	 * @author will
 	 * all possible phones
 	 */
-	public static enum PhoneType {
+	public static enum Sound {
 		AA, AE, AH, AO, AW, AY, B, CH, D, DH, EH, ER, EY, F, G, HH, IH, IY, JH, K, L, M,
 		N, NG, OW, OY, P, R, S, SH, T, TH, UH, UW, V, W, Y, Z, ZH
 	};
 
-	private PhoneType phone;
+	private Sound phone;
 	/**
 	 * how much vocal emphasis to place on this phone
 	 */
@@ -33,20 +33,20 @@ public class Phone {
 	 */
 	public Phone(String phoneString){
 		if (!Character.isDigit(phoneString.charAt(phoneString.length()-1))){
-			this.phone = PhoneType.valueOf(phoneString);
+			this.phone = Sound.valueOf(phoneString);
 		}
 		else {
-			this.phone = PhoneType.valueOf(phoneString.substring(0, phoneString.length()-1));
+			this.phone = Sound.valueOf(phoneString.substring(0, phoneString.length()-1));
 			this.stress = Integer.parseInt(phoneString.charAt(phoneString.length()-1)+"");
 		}
 
-		this.isSyllable = Rhymer.isSyllable(phone);
+		this.isSyllable = Rhymer.isSyllableNuc(phone);
 	}
 
 	/**
-	 * @return the phone
+	 * @return the sound
 	 */
-	public PhoneType getPhoneType() {
+	public Sound getSound() {
 		return phone;
 	}
 

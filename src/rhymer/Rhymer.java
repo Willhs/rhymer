@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,14 +18,15 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import rhymer.lang.Phone;
-import rhymer.lang.Phone.PhoneType;
+import rhymer.lang.Phone.Sound;
+import rhymer.lang.Rhyme;
 import rhymer.lang.Sentence;
 import rhymer.lang.Word;
 
 public class Rhymer {
 
 	private Map<String, Word> dictionary;
-	public static Map<PhoneType, String> phoneType;
+	public static Map<Sound, String> phoneType;
 
 	private static final String DICT_PATH = "dict" + File.separator;
 
@@ -35,9 +37,9 @@ public class Rhymer {
 		String content = extractContent(contentFN);
 		List<Sentence> sentences = extractSentences(content);
 
-		Set<RhymeSet<Sentence>> rhymes = findRhymingSentences(sentences);
+		Set<Rhyme> rhymes = findRhymingSentences(sentences);
 
-		printRhymes(rhymes, 500);
+		printRhymes(rhymes, 50);
 	}
 
 	/**
@@ -81,7 +83,7 @@ public class Rhymer {
 		return dict;
 	}
 
-	public Map<PhoneType, String> readPhoneSyllables(){
+	private Map<Sound, String> readPhoneSyllables(){
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(DICT_PATH + "cmudict" + File.separator + "cmudict-0.7b.phones"));
@@ -89,7 +91,7 @@ public class Rhymer {
 			e.printStackTrace();
 		}
 
-		Map<PhoneType, String> phoneTypes = new HashMap<>();
+		Map<Sound, String> phoneTypes = new HashMap<>();
 
 		String line;
 		try {
@@ -98,7 +100,7 @@ public class Rhymer {
 				String phone = parts[0];
 				String type = parts[1];
 
-				phoneTypes.put(PhoneType.valueOf(phone), type);
+				phoneTypes.put(Sound.valueOf(phone), type);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -115,7 +117,6 @@ public class Rhymer {
 
 	private List<Sentence> extractSentences(String content) {
 		// split sentences
-		// TODO: make more accurate, allow acronyms and abbreviations etc.
 		String[] strSentences = content.split("\\.|\\\n");
 		List<Sentence> sentences = new ArrayList<>();
 
@@ -128,6 +129,7 @@ public class Rhymer {
 		return sentences;
 	}
 
+	// TODO: make more accurate, allow acronyms and abbreviations etc.
 	private List<Word> extractWords(String sentence) {
 		Scanner scan = new Scanner(sentence);
 		List<Word> words = new ArrayList<>();
@@ -235,7 +237,7 @@ public class Rhymer {
 		word = word.trim();
 
 		String[] dirtyChars = new String[]{ "\"", ".", ",", ";", ":", "-",
-				"[", "]", "(", ")", "{", "}", "“", "”"};
+				"[", "]", "(", ")", "{", "}"};
 
 		for (String dirtyChar : dirtyChars){
 			word = word.replace(dirtyChar, ""); // using charsequence args (so not regex)
@@ -275,21 +277,38 @@ public class Rhymer {
 	}
 
 
-	public static boolean isSyllable(PhoneType phone) {
-		return phoneType.get(phone).equals("vowel");
+	/**
+	 * @param sound
+	 * @return if the sound is a syllable nucleus
+	 */
+	public static boolean isSyllableNuc(Sound sound) {
+		return phoneType.get(sound).equals("vowel");
 	}
 
 	/**
 	 * Prints out rhyming sentences. Prints 0 - TO_SHOW rhymes
 	 * @param rhyming
 	 */
-	private void printRhymes(Set<RhymeSet<Sentence>> rhyming, int howMany) {
-		List<RhymeSet<Sentence>> sortedRhymes = new ArrayList<>(rhyming);
-		Collections.sort(sortedRhymes);
+	private void printRhymes(Set<Rhyme> rhyming, int numToShow) {
+		
+		if (rhyming.size() == 0){
+			System.out.println("No rhymes found!");
+			return;
+		}
+		
+		// sort rhymes by their score
+		List<Rhyme> sortedRhymes = new ArrayList<>(rhyming);
+		Collections.sort(sortedRhymes, new Comparator<Rhyme>() {
+			public int compare(Rhyme r1, Rhyme r2){
+				return Integer.compare(r1.getScore(), r2.getScore());
+			}
+		});
 		Collections.reverse(sortedRhymes);
 
-		for (int i = 0; i < howMany && i < sortedRhymes.size(); i++){
-			RhymeSet<Sentence> rhymes = sortedRhymes.get(i);
+		int maxRhymes = Math.min(numToShow, sortedRhymes.size());
+
+		for (int i = 0; i < maxRhymes; i++){
+			Rhyme rhymes = sortedRhymes.get(i);
 			System.out.println("-------------------");
 			for (Sentence s : rhymes){
 				System.out.println(s.toString());
@@ -300,23 +319,27 @@ public class Rhymer {
 		}
 	}
 
-	private Set<RhymeSet<Sentence>> findRhymingSentences(List<Sentence> sentences) {
-		Set<RhymeSet<Sentence>> rhyming = new HashSet<>();
+	private Set<Rhyme> findRhymingSentences(List<Sentence> sentences) {
+		Set<Rhyme> rhyming = new HashSet<>();
 
 		for (Sentence s1 : sentences){
 			for (Sentence s2 : sentences){
-				int rhymeScore = s1.tailRhymesWith(s2);
+				if (s1.equals(s2)) continue; // skip itself
+				int rhymeScore = s1.perfectRhymeScore(s2);
 
-				if (!s1.equals(s2) && rhymeScore > 0){
+				if (rhymeScore > 0){
 					Set<Sentence> rhymes = new HashSet<>();
 					rhymes.add(s1);
 					rhymes.add(s2);
-					RhymeSet<Sentence> rhymeSet = new RhymeSet<>();
-					rhymeSet.addRhyming(rhymes, rhymeScore);
-					rhyming.add(rhymeSet);
+					Rhyme rhyme = new Rhyme(rhymes, rhymeScore);
+					rhyming.add(rhyme);
 				}
 			}
 		}
 		return rhyming;
+	}
+
+	public static boolean isConstonant(Sound sound) {
+		return !phoneType.get(sound).equals("vowel");
 	}
 }

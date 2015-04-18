@@ -3,10 +3,12 @@ package rhymer.lang;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import rhymer.Rhymer;
-import rhymer.lang.Phone.PhoneType;
 
 public class Sentence {
 
@@ -69,7 +71,7 @@ public class Sentence {
 		if (!(o instanceof Sentence))
 			return false;
 
-		return Arrays.equals(words, ((Sentence)o).getWords());
+		return Arrays.equals(this.words, ((Sentence)o).getWords());
 	}
 
 	@Override
@@ -77,14 +79,104 @@ public class Sentence {
 		return words.length * numSyllables;
 	}
 
+
+	// MULTIPLE WORDS - Will continue if enough time
 	/**
 	 * checks if there is a tail rhyme with both sentences
 	 * ==== CURRENTLY ONLY ACCEPTS PERFECT RHYMES =====
 	 * TODO: accept other types of rhymes
 	 * @param s2
-	 * @return
+	 * @return rhymescore (-1 if no rhymes)
 	 */
-	public int tailRhymesWith(Sentence s2) {
+	public int perfectRhymeScore(Sentence s2) {
+		// put both sentences in an array (to reuse code)
+		// could be extended to rhyme multiple sentences
+		Sentence[] s = new Sentence[]{ this, s2 };
+		int numSentences = s.length;
+		
+		// get all words from sentences
+		Queue<Word>[] words = new Queue[2];
+		for (int i = 0; i < numSentences; i++){
+			List<Word> wordList = Arrays.asList(s[i].getWords().clone());
+			Collections.reverse(wordList);
+			words[i] = new LinkedList<>(wordList);
+		}
+		
+		Word[] currentWords = new Word[numSentences];
+		
+		int rhymingSyllables = 0;		
+		boolean findingRhyme = true;
+
+		// go until out of words or rhyming has ended
+		rhymeFinder: while (findingRhyme){
+			
+			// add next word to be compared 
+			for (int i = 0; i < numSentences; i++){
+				if (currentWords[i] == null){
+					if (words[i].isEmpty())
+						break rhymeFinder;
+					currentWords[i] = words[i].poll();
+				}
+			}
+			// get min syllable count of each word to rhyme
+			int minSyllables = Integer.MAX_VALUE;
+			for (int i = 0; i < numSentences; i++){
+				int syllables = currentWords[i].getNumSyllables();
+				if (syllables < minSyllables)
+					minSyllables = syllables;
+			}
+			// split words if they have more than minSyllables syllables
+			Word[] toRhyme = new Word[numSentences];
+			for (int i = 0; i < numSentences; i++){
+				Word word = currentWords[i];
+				// need to split?
+				if (word.getNumSyllables() > minSyllables){
+					Word[] subWords = word.splitWord(word.getNumSyllables() - minSyllables);
+					currentWords[i] = subWords[0];
+					toRhyme[i] = subWords[1];
+				}
+				else {
+					currentWords[i] = null;
+					toRhyme[i] = word;
+				}
+			}
+			
+			// ASSUMES THERE ARE ONLY 2 SENTENCES
+			int wordRhymingSyllables = toRhyme[0].rhymeScoreWith(toRhyme[1]);
+			rhymingSyllables += wordRhymingSyllables;
+			
+			if (wordRhymingSyllables == 0)
+				findingRhyme = false;
+		}
+		
+//		System.out.println("==============================");
+//		System.out.println(words[0]);
+//		System.out.println(words[1]);
+//		System.out.println("==============================");
+
+		int score = rhymingSyllables;
+
+		return score;
+	}
+
+	private List<Phone> getAllSyllables(){
+		List<Phone> syllables = new ArrayList<>();
+		for (Word word : words){
+			syllables.addAll(Arrays.asList(word.getSyllablePhones()));
+		}
+		return syllables;
+	}
+
+	private List<Phone> getAllPhones(){
+		List<Phone> syllables = new ArrayList<>();
+		for (Word word : words){
+			syllables.addAll(Arrays.asList(word.getPhones()));
+		}
+		return syllables;
+	}
+
+	/*
+	public int numRhymingSyllables(Sentence s2) {
 		// get all syllables from sentences
 		List<Phone> phones1 = this.getAllPhones();
 		List<Phone> phones2 = s2.getAllPhones();
@@ -119,29 +211,13 @@ public class Sentence {
 				: stressPos == 3 ? "dactylic"
 				: "none";
 
-		/*if (pRType.equals("double") || pRType.equals("dactylic")){
-			System.out.println("---- " + pRType + "----" + "\n" + this + "\n" + s2);
-		}*/
+		//if (pRType.equals("double") || pRType.equals("dactylic")){
+		//	System.out.println("---- " + pRType + "----" + "\n" + this + "\n" + s2);
+		//}
 
 		int score = syllableCount;
 
 		return score;
-	}
-
-	private List<Phone> getAllSyllables(){
-		List<Phone> syllables = new ArrayList<>();
-		for (Word word : words){
-			syllables.addAll(Arrays.asList(word.getSyllablePhones()));
-		}
-		return syllables;
-	}
-
-	private List<Phone> getAllPhones(){
-		List<Phone> syllables = new ArrayList<>();
-		for (Word word : words){
-			syllables.addAll(Arrays.asList(word.getPhones()));
-		}
-		return syllables;
-	}
-
+	}*/
+	
 }
