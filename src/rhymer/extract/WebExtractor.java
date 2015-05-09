@@ -22,46 +22,46 @@ import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import de.l3s.boilerpipe.extractors.CommonExtractors;
 import de.l3s.boilerpipe.sax.HTMLHighlighter;
 
-public class Extractor {
+public class WebExtractor {
 
 	public static String extractTextFromWebPage(URL url){
 		long startTime = System.currentTimeMillis();
 		System.out.print("Extracting content from " + url.getHost() + "... ");
-		
+
 		String text = "";
-		
+
 		// choose from a set of useful BoilerpipeExtractors...
 	//	final BoilerpipeExtractor extractor = CommonExtractors.ARTICLE_EXTRACTOR;
 		final BoilerpipeExtractor extractor = CommonExtractors.DEFAULT_EXTRACTOR;
 	//	final BoilerpipeExtractor extractor = CommonExtractors.CANOLA_EXTRACTOR;
 	//	final BoilerpipeExtractor extractor = CommonExtractors.LARGEST_CONTENT_EXTRACTOR;
-		
+
 		try {
 			// choose the operation mode (i.e., highlighting or extraction)
 			final HTMLHighlighter hh = HTMLHighlighter.newHighlightingInstance();
 
 			text = hh.process(url, extractor);
-			
+
 			// write highlighted output
 			PrintWriter out = new PrintWriter("highlighted/" + url.getHost() + ".html", "UTF-8");
 			out.println("<base href=\"" + url + "\" >");
 			out.println("<meta http-equiv=\"Content-Type\" content=\"text-html; charset=utf-8\" />");
 			out.println(text);
 			out.close();
-			
+
 		} catch (BoilerpipeProcessingException e) {
 			e.printStackTrace();
 		} catch (Exception e){
 			long timeTaken = System.currentTimeMillis() - startTime;
 			System.err.println(e.getLocalizedMessage() + " after: " + timeTaken + "ms");
-		} 
-		
+		}
+
 		long timeTaken = System.currentTimeMillis() - startTime;
 		System.out.println("done in " + (timeTaken)+ "ms");
-		
+
 		return text;
 	}
-	
+
 	private static void outputHighlightedText(URL url) throws Exception {
 		// choose from a set of useful BoilerpipeExtractors...
 	//	final BoilerpipeExtractor extractor = CommonExtractors.ARTICLE_EXTRACTOR;
@@ -72,24 +72,14 @@ public class Extractor {
 		// choose the operation mode (i.e., highlighting or extraction)
 		final HTMLHighlighter hh = HTMLHighlighter.newHighlightingInstance();
 //		final HTMLHighlighter hh = HTMLHighlighter.newExtractingInstance();
-		
+
 		PrintWriter out = new PrintWriter("highlighted/" + url.getHost() + ".html", "UTF-8");
 		out.println("<base href=\"" + url + "\" >");
 		out.println("<meta http-equiv=\"Content-Type\" content=\"text-html; charset=utf-8\" />");
 		out.println(hh.process(url, extractor));
 		out.close();
 	}
-	
-	public static void main(String[] args){
 
-		List<URL> queryURLs = parseGoogleSearchResults("dogs", 100);
-		
-		String contentString = "";
-		for (URL url : queryURLs){
-			contentString += extractTextFromWebPage(url);
-		}
-	}
-	
 	/**
 	 * Google search url guide: http://moz.com/ugc/the-ultimate-guide-to-the-google-search-parameters
 	 * @param query
@@ -120,15 +110,15 @@ public class Extractor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		List<URL> resultURLs = new ArrayList<>();
-		
+
 		Elements resultHeadings = doc.select(".r");
-		
+
 		for (Element resultHeading : resultHeadings){
 			if (resultHeading.childNodeSize() == 0)
 				System.err.println("Result heading has no link!");
-			
+
 			Node linkElem = resultHeading.childNode(0);
 			String href = linkElem.attr("href");
 			String prefix = "/url?q=";
@@ -146,5 +136,20 @@ public class Extractor {
 		long timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Fetched " + resultURLs.size() + " URLS from google in " + timeSpent + "ms");
 		return resultURLs;
+	}
+
+
+	/**
+	 * For testing..
+	 * @param args
+	 */
+	public static void main(String[] args){
+
+		List<URL> queryURLs = parseGoogleSearchResults("dogs", 100);
+
+		String contentString = "";
+		for (URL url : queryURLs){
+			contentString += extractTextFromWebPage(url);
+		}
 	}
 }

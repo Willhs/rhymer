@@ -7,10 +7,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import rhymer.extract.Extractor;
+import rhymer.extract.WebExtractor;
+import rhymer.lang.Rhyme;
 
 public class Main {
 
@@ -20,21 +22,23 @@ public class Main {
 
 		String query = JOptionPane.showInputDialog("Search for rhymes about...");
 		int numPages = 35;
-		List<URL> queryURLs = Extractor.parseGoogleSearchResults(query, numPages);
-		
+		List<URL> queryURLs = WebExtractor.parseGoogleSearchResults(query, numPages);
+
 		String contentString = "";
-		
+
 		for (URL url : queryURLs){
-			contentString += Extractor.extractTextFromWebPage(url);
+			contentString += WebExtractor.extractTextFromWebPage(url);
 		}
-		
+
 		//String contentString = extractFromFile(TEXT_PATH + "computer-wiki.txt");
 
 		System.out.println("Extracted content with: " + contentString.length() + " characters");
-		
-		new Rhymer(contentString);
+
+		Rhymer r = new Rhymer();
+		Set<Rhyme> rhymes = r.extractRhymes(contentString);
+		r.printRhymes(rhymes, 50);
 	}
-	
+
 	private static String extractFromFile(String filename) {
 		BufferedReader reader = null;
 

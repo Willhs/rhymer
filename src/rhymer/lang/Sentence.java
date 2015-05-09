@@ -46,7 +46,7 @@ public class Sentence {
 	public int getNumSyllables() {
 		return numSyllables;
 	}
-	
+
 	public double getScore(){
 		return score;
 	}
@@ -89,7 +89,6 @@ public class Sentence {
 	}
 
 
-	// MULTIPLE WORDS - Will continue if enough time
 	/**
 	 * checks if there is a tail rhyme with both sentences
 	 * ==== CURRENTLY ONLY ACCEPTS PERFECT RHYMES =====
@@ -98,11 +97,14 @@ public class Sentence {
 	 * @return rhymescore (-1 if no rhymes)
 	 */
 	public int perfectRhymeScore(Sentence s2) {
+
+		System.out.println("testing: \n" + this.toStringPhones() + "\n" + s2.toStringPhones());
+
 		// put both sentences in an array (to reuse code)
 		// could be extended to rhyme multiple sentences
 		Sentence[] s = new Sentence[]{ this, s2 };
 		int numSentences = s.length;
-		
+
 		// get all words from sentences
 		Queue<Word>[] words = new Queue[2];
 		for (int i = 0; i < numSentences; i++){
@@ -110,16 +112,16 @@ public class Sentence {
 			Collections.reverse(wordList);
 			words[i] = new LinkedList<>(wordList);
 		}
-		
+
 		Word[] currentWords = new Word[numSentences];
-		
-		int rhymingSyllables = 0;		
+
+		int rhymingSyllables = 0;
 		boolean findingRhyme = true;
 
 		// go until out of words or rhyming has ended
 		rhymeFinder: while (findingRhyme){
-			
-			// add next word to be compared 
+
+			// add next word to be compared
 			for (int i = 0; i < numSentences; i++){
 				if (currentWords[i] == null){
 					if (words[i].isEmpty())
@@ -149,15 +151,15 @@ public class Sentence {
 					toRhyme[i] = word;
 				}
 			}
-			
+
 			// ASSUMES THERE ARE ONLY 2 SENTENCES
 			int wordRhymingSyllables = toRhyme[0].rhymeScoreWith(toRhyme[1]);
 			rhymingSyllables += wordRhymingSyllables;
-			
+
 			if (wordRhymingSyllables == 0)
 				findingRhyme = false;
 		}
-		
+
 //		System.out.println("==============================");
 //		System.out.println(words[0]);
 //		System.out.println(words[1]);
@@ -228,5 +230,5 @@ public class Sentence {
 
 		return score;
 	}*/
-	
+
 }
