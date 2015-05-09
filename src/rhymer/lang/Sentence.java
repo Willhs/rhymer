@@ -14,12 +14,17 @@ public class Sentence {
 
 	private final Word[] words;
 	private final int numSyllables;
+	/**
+	 * A fitness value based on how few words had to be removed because they were unknown
+	 */
+	private final double score;
 
 	/**
 	 * @param words gotta be non-null
 	 */
-	public Sentence(Word[] words) {
+	public Sentence(Word[] words, double score) {
 		this.words = words;
+		this.score = score;
 
 		int totalSyllables = 0;
 		for (Word w : words){
@@ -40,6 +45,10 @@ public class Sentence {
 	 */
 	public int getNumSyllables() {
 		return numSyllables;
+	}
+	
+	public double getScore(){
+		return score;
 	}
 
 	public String toString(){
@@ -159,20 +168,20 @@ public class Sentence {
 		return score;
 	}
 
-	private List<Phone> getAllSyllables(){
-		List<Phone> syllables = new ArrayList<>();
-		for (Word word : words){
-			syllables.addAll(Arrays.asList(word.getSyllablePhones()));
+	public List<Phone> getSyllablePhones() {
+		List<Phone> syllablePhones = new ArrayList<>();
+		for (Word w : words){
+			syllablePhones.addAll(Arrays.asList(w.getSyllablePhones()));
 		}
-		return syllables;
+		return syllablePhones;
 	}
-
-	private List<Phone> getAllPhones(){
-		List<Phone> syllables = new ArrayList<>();
-		for (Word word : words){
-			syllables.addAll(Arrays.asList(word.getPhones()));
+	public List<Phone> getSyllablePhonesReversed() {
+		List<Phone> syllablePhones = new ArrayList<>();
+		for (Word w : words){
+			syllablePhones.addAll(Arrays.asList(w.getSyllablePhones().clone()));
 		}
-		return syllables;
+		Collections.reverse(syllablePhones);
+		return syllablePhones;
 	}
 
 	/*

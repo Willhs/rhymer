@@ -1,5 +1,7 @@
 package rhymer.lang;
 
+import java.util.Arrays;
+
 import rhymer.Rhymer;
 
 /**
@@ -10,14 +12,14 @@ public class Phone {
 
 	/**
 	 * @author will
-	 * all possible phones
+	 * all possible phone sounds
 	 */
 	public static enum Sound {
 		AA, AE, AH, AO, AW, AY, B, CH, D, DH, EH, ER, EY, F, G, HH, IH, IY, JH, K, L, M,
 		N, NG, OW, OY, P, R, S, SH, T, TH, UH, UW, V, W, Y, Z, ZH
 	};
 
-	private Sound phone;
+	private Sound sound;
 	/**
 	 * how much vocal emphasis to place on this phone
 	 */
@@ -33,21 +35,21 @@ public class Phone {
 	 */
 	public Phone(String phoneString){
 		if (!Character.isDigit(phoneString.charAt(phoneString.length()-1))){
-			this.phone = Sound.valueOf(phoneString);
+			this.sound = Sound.valueOf(phoneString);
 		}
 		else {
-			this.phone = Sound.valueOf(phoneString.substring(0, phoneString.length()-1));
+			this.sound = Sound.valueOf(phoneString.substring(0, phoneString.length()-1));
 			this.stress = Integer.parseInt(phoneString.charAt(phoneString.length()-1)+"");
 		}
 
-		this.isSyllable = Rhymer.isSyllableNuc(phone);
+		this.isSyllable = Rhymer.isSyllableNuc(sound);
 	}
 
 	/**
 	 * @return the sound
 	 */
 	public Sound getSound() {
-		return phone;
+		return sound;
 	}
 
 	/**
@@ -62,10 +64,24 @@ public class Phone {
 	}
 
 	public String toString(){
-		return phone.toString();
+		return sound.toString();
 	}
 
 	public String toStringStress(){
-		return phone.toString() + stress;
+		return sound.toString() + stress;
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (!(other instanceof Phone))
+			return false;
+		Phone o = (Phone)other;
+		
+		return sound == o.getSound() && stress == o.getStress();
+	}
+	
+	@Override
+	public int hashCode(){
+		return Arrays.asList(Sound.values()).indexOf(sound) * (stress == 0 ? 1 : stress);
 	}
 }

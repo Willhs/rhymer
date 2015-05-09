@@ -71,9 +71,6 @@ public class Word {
 	 */
 	public int rhymeScoreWith(Word other){
 		
-		if (this.word.equalsIgnoreCase("computer") && other.word.equalsIgnoreCase("computers"))
-			System.out.println();
-		
 		// if violate precondition
 		if (this.numSyllables != other.numSyllables){
 			System.err.println("different num of syllables: " + Arrays.toString(this.getPhones()) + ", " + Arrays.toString(other.getPhones()));

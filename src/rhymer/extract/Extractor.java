@@ -25,24 +25,49 @@ import de.l3s.boilerpipe.sax.HTMLHighlighter;
 public class Extractor {
 
 	public static String extractTextFromWebPage(URL url){
+		long startTime = System.currentTimeMillis();
+		System.out.print("Extracting content from " + url.getHost() + "... ");
+		
 		String text = "";
+		
+		// choose from a set of useful BoilerpipeExtractors...
+	//	final BoilerpipeExtractor extractor = CommonExtractors.ARTICLE_EXTRACTOR;
+		final BoilerpipeExtractor extractor = CommonExtractors.DEFAULT_EXTRACTOR;
+	//	final BoilerpipeExtractor extractor = CommonExtractors.CANOLA_EXTRACTOR;
+	//	final BoilerpipeExtractor extractor = CommonExtractors.LARGEST_CONTENT_EXTRACTOR;
+		
 		try {
-			text = ArticleExtractor.INSTANCE.getText(url);
-			outputHighlightedText(url);
+			// choose the operation mode (i.e., highlighting or extraction)
+			final HTMLHighlighter hh = HTMLHighlighter.newHighlightingInstance();
+
+			text = hh.process(url, extractor);
+			
+			// write highlighted output
+			PrintWriter out = new PrintWriter("highlighted/" + url.getHost() + ".html", "UTF-8");
+			out.println("<base href=\"" + url + "\" >");
+			out.println("<meta http-equiv=\"Content-Type\" content=\"text-html; charset=utf-8\" />");
+			out.println(text);
+			out.close();
+			
 		} catch (BoilerpipeProcessingException e) {
 			e.printStackTrace();
 		} catch (Exception e){
-			e.printStackTrace();
-		}
+			long timeTaken = System.currentTimeMillis() - startTime;
+			System.err.println(e.getLocalizedMessage() + " after: " + timeTaken + "ms");
+		} 
+		
+		long timeTaken = System.currentTimeMillis() - startTime;
+		System.out.println("done in " + (timeTaken)+ "ms");
+		
 		return text;
 	}
 	
-	public static void outputHighlightedText(URL url) throws Exception {
+	private static void outputHighlightedText(URL url) throws Exception {
 		// choose from a set of useful BoilerpipeExtractors...
-		final BoilerpipeExtractor extractor = CommonExtractors.ARTICLE_EXTRACTOR;
-//		final BoilerpipeExtractor extractor = CommonExtractors.DEFAULT_EXTRACTOR;
-//		final BoilerpipeExtractor extractor = CommonExtractors.CANOLA_EXTRACTOR;
-//		final BoilerpipeExtractor extractor = CommonExtractors.LARGEST_CONTENT_EXTRACTOR;
+	//	final BoilerpipeExtractor extractor = CommonExtractors.ARTICLE_EXTRACTOR;
+		final BoilerpipeExtractor extractor = CommonExtractors.DEFAULT_EXTRACTOR;
+	//  final BoilerpipeExtractor extractor = CommonExtractors.CANOLA_EXTRACTOR;
+	//	final BoilerpipeExtractor extractor = CommonExtractors.LARGEST_CONTENT_EXTRACTOR;
 
 		// choose the operation mode (i.e., highlighting or extraction)
 		final HTMLHighlighter hh = HTMLHighlighter.newHighlightingInstance();
@@ -56,31 +81,27 @@ public class Extractor {
 	}
 	
 	public static void main(String[] args){
-		String urlText = "http://en.wikipedia.org/wiki/Andrew_Johnson";
-		String text = "";
-		try {
-			text = extractTextFromWebPage(new URL(urlText));
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
 
-		List<URL> queryURLs = googleSearchResultsParser("dogs", 10);
+		List<URL> queryURLs = parseGoogleSearchResults("dogs", 100);
 		
 		String contentString = "";
-		
 		for (URL url : queryURLs){
 			contentString += extractTextFromWebPage(url);
 		}
 	}
 	
 	/**
+	 * Google search url guide: http://moz.com/ugc/the-ultimate-guide-to-the-google-search-parameters
 	 * @param query
-	 * @param numResults must be <= 10 for now
+	 * @param numResults must be <= 100
 	 * @return search result URLs
 	 */
-	public static List<URL> googleSearchResultsParser(String query, int numResults){
+	public static List<URL> parseGoogleSearchResults(String query, int numResults){
+		long startTime = System.currentTimeMillis();
+		// format query
+		String formattedQuery = query.replace(" ", "+");
 		String google = "http://www.google.com";
-		String urlString = google + "/search?q=" + query;
+		String urlString = google + "/search?q=" + formattedQuery + "&num=" + numResults;
 		Document doc = null;
 		try {
 			 HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();
@@ -100,11 +121,9 @@ public class Extractor {
 			e.printStackTrace();
 		}
 		
-		
 		List<URL> resultURLs = new ArrayList<>();
 		
 		Elements resultHeadings = doc.select(".r");
-		//System.out.println(resultHeadings);
 		
 		for (Element resultHeading : resultHeadings){
 			if (resultHeading.childNodeSize() == 0)
@@ -124,7 +143,8 @@ public class Extractor {
 				}
 			}
 		}
-		
+		long timeSpent = System.currentTimeMillis() - startTime;
+		System.out.println("Fetched " + resultURLs.size() + " URLS from google in " + timeSpent + "ms");
 		return resultURLs;
 	}
 }
