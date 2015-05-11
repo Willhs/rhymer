@@ -25,7 +25,7 @@ import rhymer.lang.Word;
 
 public class Rhymer {
 
-	private Map<String, Word> dictionary;
+	private final Map<String, Word> dictionary;
 	public static Map<Sound, String> phoneTypes;
 
 	private static final String DICT_PATH = "dict" + File.separator;
@@ -36,10 +36,6 @@ public class Rhymer {
 				"cmudict" + File.separator + "cmudict-0.7b.txt",
 				"will" + File.separator + "willdict.txt"
 		});
-
-//		System.out.println("Trie size " + sentences.size());
-//		System.out.println("root node children: " + sentences.rootNodeChildren());
-//		System.out.println(sentences);
 	}
 
 	public Set<Rhyme> extractRhymes(String rawContent){
@@ -133,8 +129,8 @@ public class Rhymer {
 		System.out.println("Finding rhyming sentences (" + sentences.size() + " sentences)");
 		long startTime = System.currentTimeMillis();
 		Set<Rhyme> rhyming = new HashSet<>();
-		int i = 0;
-		long totalTime = 0;
+		int i = 0; 
+		long totalTime = 0; 
 
 		for (Sentence s1 : sentences){
 			//Set<Sentence> rhymesWith = sentences.getValuesBelow(s1.getSyllablePhonesReversed());
@@ -196,6 +192,7 @@ public class Rhymer {
 			printer.println("-------------------");
 			for (Sentence s : r){
 				printer.println(s.toString());
+				System.out.println(s.toString());
 				//System.out.println(s.toStringPhones());
 			}
 			printer.println("Score: " + r.getScore());
@@ -206,5 +203,9 @@ public class Rhymer {
 
 	public static boolean isConstonant(Sound sound) {
 		return !phoneTypes.get(sound).equals("vowel");
+	}
+
+	public Map<String, Word> getDictionary() {
+		return dictionary;
 	}
 }

@@ -233,4 +233,12 @@ public class Word {
 		}
 		return phoneString;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (!(o instanceof Word))
+			return false;
+		
+		return this.word.equals(((Word)o).getWord());
+	}
 }

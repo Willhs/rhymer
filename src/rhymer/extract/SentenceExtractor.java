@@ -17,6 +17,8 @@ import rhymer.lang.Word;
 public class SentenceExtractor {
 
 	Map<String, Word> dictionary;
+	
+	public static String SPLIT_REGEX = "\\.|\\\n";
 
 	private SentenceExtractor(Map<String, Word> dictionary){
 		this.dictionary = dictionary;
@@ -29,17 +31,18 @@ public class SentenceExtractor {
 
 	private Set<Sentence> extract(String content){
 		// split sentences
-		String[] strSentences = content.split("\\.|\\\n");
+		String[] strSentences = content.split(SPLIT_REGEX);
 		//Trie sentences = new Trie();
 		Set<Sentence> sentences = new HashSet<>();
 
 		for (String strSentence : strSentences){
-			//System.out.println(strSentence);
 			Sentence sentence = extractWords(strSentence);
+			//if (sentence.toString().equals("GNU IS AN OPERATING SYSTEM THAT IS FREE IS IT RESPECTS USERS' FREEDOM"))
 
 			if (keepSentence(sentence)){
 				//sentences.put(sentence.getSyllablePhonesReversed(), sentence);
 				sentences.add(sentence);
+				
 			}
 		}
 
@@ -191,6 +194,10 @@ public class SentenceExtractor {
 		word = word.toUpperCase();
 //		System.out.println("clean : " + word);
 		return word;
+	}
+	
+	public static String[] splitIntoSentences(String string){
+		return string.split(SPLIT_REGEX);
 	}
 
 }

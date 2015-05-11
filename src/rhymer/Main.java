@@ -21,7 +21,7 @@ public class Main {
 	public static void main(String[] args){
 
 		String query = JOptionPane.showInputDialog("Search for rhymes about...");
-		int numPages = 35;
+		int numPages = 10;
 		List<URL> queryURLs = WebExtractor.parseGoogleSearchResults(query, numPages);
 
 		String contentString = "";

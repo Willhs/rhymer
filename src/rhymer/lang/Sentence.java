@@ -98,8 +98,6 @@ public class Sentence {
 	 */
 	public int perfectRhymeScore(Sentence s2) {
 
-		System.out.println("testing: \n" + this.toStringPhones() + "\n" + s2.toStringPhones());
-
 		// put both sentences in an array (to reuse code)
 		// could be extended to rhyme multiple sentences
 		Sentence[] s = new Sentence[]{ this, s2 };

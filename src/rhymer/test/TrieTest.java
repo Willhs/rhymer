@@ -13,7 +13,7 @@ public class TrieTest {
 
 	@Before
 	public void before(){
-		Rhymer.phoneTypes = Rhymer.readPhoneSet();
+		Rhymer.readPhoneSet();
 	}
 	
 	@Test

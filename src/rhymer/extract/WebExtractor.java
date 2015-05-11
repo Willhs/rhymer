@@ -18,8 +18,8 @@ import org.jsoup.select.Elements;
 
 import de.l3s.boilerpipe.BoilerpipeExtractor;
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
-import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import de.l3s.boilerpipe.extractors.CommonExtractors;
+import de.l3s.boilerpipe.extractors.DefaultExtractor;
 import de.l3s.boilerpipe.sax.HTMLHighlighter;
 
 public class WebExtractor {
@@ -40,20 +40,21 @@ public class WebExtractor {
 			// choose the operation mode (i.e., highlighting or extraction)
 			final HTMLHighlighter hh = HTMLHighlighter.newHighlightingInstance();
 
-			text = hh.process(url, extractor);
+			String highlightedHTML = hh.process(url, extractor);
+			text = ((DefaultExtractor)extractor).getText(url);
 
 			// write highlighted output
 			PrintWriter out = new PrintWriter("highlighted/" + url.getHost() + ".html", "UTF-8");
 			out.println("<base href=\"" + url + "\" >");
 			out.println("<meta http-equiv=\"Content-Type\" content=\"text-html; charset=utf-8\" />");
-			out.println(text);
+			out.println(highlightedHTML);
 			out.close();
 
 		} catch (BoilerpipeProcessingException e) {
 			e.printStackTrace();
 		} catch (Exception e){
 			long timeTaken = System.currentTimeMillis() - startTime;
-			System.err.println(e.getLocalizedMessage() + " after: " + timeTaken + "ms");
+			System.err.println("failed: " + e.getLocalizedMessage() + " after: " + timeTaken + "ms");
 		}
 
 		long timeTaken = System.currentTimeMillis() - startTime;
