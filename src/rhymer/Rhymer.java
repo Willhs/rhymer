@@ -193,7 +193,6 @@ public class Rhymer {
 			for (Sentence s : r){
 				printer.println(s.toString());
 				System.out.println(s.toString());
-				//System.out.println(s.toStringPhones());
 			}
 			printer.println("Score: " + r.getScore());
 			printer.println("-------------------");

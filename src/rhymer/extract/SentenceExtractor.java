@@ -37,10 +37,8 @@ public class SentenceExtractor {
 
 		for (String strSentence : strSentences){
 			Sentence sentence = extractWords(strSentence);
-			//if (sentence.toString().equals("GNU IS AN OPERATING SYSTEM THAT IS FREE IS IT RESPECTS USERS' FREEDOM"))
 
 			if (keepSentence(sentence)){
-				//sentences.put(sentence.getSyllablePhonesReversed(), sentence);
 				sentences.add(sentence);
 				
 			}
