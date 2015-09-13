@@ -191,12 +191,12 @@ public class Rhymer {
 			Rhyme r = sortedRhymes.get(i);
 			printer.println("-------------------");
 			for (Sentence s : r){
-				printer.println(s.toStringPhones());
+				printer.println(s.toString());
 			}
 			printer.println("Score: " + r.getScore());
 			printer.println("-------------------");
 		}
-		System.out.println("Wrote top " + maxRhymes + " rhyming sentences to file");
+		System.out.println("Wrote top " + maxRhymes + " rhyming sentences to rhymes.txt");
 	}
 
 	public static boolean isConstonant(Sound sound) {

@@ -25,6 +25,7 @@ public class Main {
 			query = args[0];
 		} else {
 			query = JOptionPane.showInputDialog("Search for rhymes about...");
+			if (query == null) return;
 		}
 		int numResults = 0;
 		if (args.length > 1){

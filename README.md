@@ -17,5 +17,6 @@ Finds rhyming sentences in the text file.
 
 ## Notes
 - skips words not in phonic dictionary
+- splits sentences by \n and .
 - phonic representations of words pertain to one accent (english I think)
 - outputs rhymes to rhymes.txt
