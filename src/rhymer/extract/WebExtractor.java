@@ -95,38 +95,41 @@ public class WebExtractor {
 		String urlString = google + "/search?q=" + formattedQuery + "&num=" + numResults;
 		Document doc = null;
 		try {
+			System.out.println("Requesting Google results page for '" + query +"'...");
 			 HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();
-	            //httpCon.addRequestProperty("User-Agent", System.getProperty("http.agent"));
-			 	httpCon.addRequestProperty("User-Agent", "Chrome/42.0.2311.90"); // Chrome/20 worked too
+		    //httpCon.addRequestProperty("User-Agent", System.getProperty("http.agent"));
+				 httpCon.addRequestProperty("User-Agent", "Chrome/42.0.2311.90"); // Chrome/20 worked too
 
-	            BufferedReader in = new BufferedReader(new InputStreamReader(
-	                    httpCon.getInputStream()));
+		    BufferedReader in = new BufferedReader(new InputStreamReader(
+			    httpCon.getInputStream()));
 
-	            String responseString = "";
-	            String line = null;
-	            while ((line = in.readLine()) != null) {
-	                responseString += line + "\n";
-	            }
-	            doc = Jsoup.parse(responseString);
+		    String responseString = "";
+		    String line = null;
+		    while ((line = in.readLine()) != null) {
+			responseString += line + "\n";
+		    }
+		    doc = Jsoup.parse(responseString);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Fetching URLs from google search query...");
 
 		List<URL> resultURLs = new ArrayList<>();
 
 		Elements resultHeadings = doc.select(".r");
 
 		for (Element resultHeading : resultHeadings){
-			if (resultHeading.childNodeSize() == 0)
+			if (resultHeading.childNodeSize() == 0){
 				System.err.println("Result heading has no link!");
+			}
 
 			Node linkElem = resultHeading.childNode(0);
 			String href = linkElem.attr("href");
-			String prefix = "/url?q=";
-			if (href.startsWith(prefix)){
+			String urlPrefix = "/url?q=";
+			if (href.startsWith(urlPrefix)){
 				try {
-					String trashStart = "&sa=U&ei"; // indicates useless end of href
-					String link = href.substring(prefix.length(), href.indexOf(trashStart));
+					String urlEnds = "&"; // where the url ends in the href string
+					String link = href.substring(urlPrefix.length(), href.indexOf(urlEnds));
 					System.out.println("link: "  + link);
 					resultURLs.add(new URL(link));
 				} catch (MalformedURLException e) {

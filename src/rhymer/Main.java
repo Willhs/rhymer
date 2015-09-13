@@ -19,10 +19,20 @@ public class Main {
 	private static final String TEXT_PATH = "text" + File.separator;
 
 	public static void main(String[] args){
+		String query = null; 
 
-		String query = JOptionPane.showInputDialog("Search for rhymes about...");
-		int numPages = 10;
-		List<URL> queryURLs = WebExtractor.parseGoogleSearchResults(query, numPages);
+		if (args.length > 0){
+			query = args[0];
+		} else {
+			query = JOptionPane.showInputDialog("Search for rhymes about...");
+		}
+		int numResults = 0;
+		if (args.length > 1){
+			numResults = Integer.parseInt(args[1]);
+		} else {
+			numResults = 20; // default
+		}
+		List<URL> queryURLs = WebExtractor.parseGoogleSearchResults(query, numResults);
 
 		String contentString = "";
 

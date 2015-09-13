@@ -191,8 +191,7 @@ public class Rhymer {
 			Rhyme r = sortedRhymes.get(i);
 			printer.println("-------------------");
 			for (Sentence s : r){
-				printer.println(s.toString());
-				System.out.println(s.toString());
+				printer.println(s.toStringPhones());
 			}
 			printer.println("Score: " + r.getScore());
 			printer.println("-------------------");
