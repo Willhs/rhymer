@@ -15,6 +15,9 @@ Generates google search URL, downloads linked pages, removes boilerplate code (a
 ## Given a text file
 Finds rhyming sentences in the text file.
 
+## To use
+java -jar rhymer.jar [query numResults]
+
 ## Notes
 - skips words not in phonic dictionary
 - splits sentences by \n and .
